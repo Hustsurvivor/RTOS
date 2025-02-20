@@ -47,28 +47,23 @@ target_net.eval()
 DQN = DQN(policy_net,target_net,db_info,pgrunner,device)
 
 if __name__=='__main__':
-    ###No online update now
-    print("Enter each query in one line")
-    print("---------------------")
-    while (1):
-        # print(">",end='')
-        query = input(">")
-        sqlSample = sqlInfo(pgrunner,query,"input")
-        # pg_cost = sql.getDPlantecy()
-        env = ENV(sqlSample,db_info,pgrunner,device,run_mode = True)
-        print("-----------------------------")
+    
+    with open(config.testSqlPath)as f:
+        sql_lines = f.readlines()
+    qid2sql = { line.split('#####')[0]:line.split('#####')[1] for line in sql_lines}
+    
+    for qid, sql in qid2sql.items():
+        sqlSample = sqlInfo(pgrunner, sql, qid)
+        env = ENV(sqlSample, db_info, pgrunner, device, run_mode = True)
         for t in count():
-                action_list, chosen_action,all_action = DQN.select_action(env,need_random=False)
+            action_list, chosen_action,all_action = DQN.select_action(env,need_random=False)
 
-                left = chosen_action[0]
-                right = chosen_action[1]
-                env.takeAction(left,right)
+            left = chosen_action[0]
+            right = chosen_action[1]
+            env.takeAction(left,right)
 
-                reward, done = env.reward_new()
-                if done:
-                    for row in reward:
-                        print(row)
-                    break
-        print("-----------------------------")
-
-
+            reward, done = env.reward_new()
+            if done:
+                with open(config.resultPath, 'a')as f:
+                    f.write('#####'.join(qid, reward.strip()) + '\n')
+                break

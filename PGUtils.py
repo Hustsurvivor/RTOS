@@ -26,7 +26,7 @@ selectivityDict = {}
 LatencyRecordFileHandle = None
 config  = Config()
 
-class PGGRunner:
+class PGRunner:
     def __init__(self,dbname = '',user = '',password = '',host = '',port = '',isCostTraining = True,latencyRecord = True,latencyRecordFile = "RecordFile.json"):
         """
         :param dbname:
@@ -243,4 +243,4 @@ latencyRecordFile = config.latencyRecordFile
 from itertools import count
 from pathlib import Path
 
-pgrunner = PGGRunner(config.dbName,config.userName,config.password,config.ip,config.port,isCostTraining=config.isCostTraining,latencyRecord = config.latencyRecord,latencyRecordFile = latencyRecordFile)
+pgrunner = PGRunner(config.dbName,config.userName,config.password,config.ip,config.port,isCostTraining=config.isCostTraining,latencyRecord = config.latencyRecord,latencyRecordFile = latencyRecordFile)

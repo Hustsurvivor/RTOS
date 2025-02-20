@@ -87,6 +87,18 @@ def QueryLoader(QueryDir):
             sql_list.append(sqlInfo(pgrunner,one_sql,filename))
     return sql_list
 
+def myQueryLoader(QueryPath):
+    with open(QueryPath)as f:
+        sql_lines = f.readlines()
+    
+    sql_list = []
+    for line in sql_lines:
+        filename = line.split('#####')[0]
+        one_sql = line.split('#####')[1]
+        sql_list.append(sqlInfo(pgrunner, one_sql, filename))
+        
+    return sql_list
+
 def resample_sql(sql_list):
     rewards = []
     reward_sum = 0
@@ -134,7 +146,7 @@ def resample_sql(sql_list):
     from math import e
     print("MRC",s_rewards/lr,"GMRL",e**(mes/lr),"SMRC",my_cost/DP_cost)
     return res_sql+sql_list
-def train(trainSet,validateSet):
+def train(trainSet,validateSet=None):
     baselines = []
     for sqlt in trainSet:
             # break
@@ -144,6 +156,7 @@ def train(trainSet,validateSet):
             sqlt.alias_cnt = len(env.sel.from_table_list)
             previous_state_list = []
             action_this_epi = []
+            # join的表少于三个 或者 不是左深树
             if (len(env.sel.from_table_list)<3) or not env.sel.baseline.left_deep:
                 baselines.append(-1)
                 continue
@@ -242,21 +255,18 @@ def train(trainSet,validateSet):
                 if ((i_episode + 1)%print_every==0):
                     print(np.mean(losses))
                     print("######################Epoch",i_episode//print_every,pg_cost)
-                    val_value = DQN.validate(validateSet)
+                    if validateSet is not None:
+                        val_value = DQN.validate(validateSet)
                     print("time",time.time()-startTime)
                     print("~~~~~~~~~~~~~~")
                 break
         if i_episode % TARGET_UPDATE == 0:
             target_net.load_state_dict(policy_net.state_dict())
-    torch.save(policy_net.cpu().state_dict(), 'CostTraining.pth')
+    torch.save(policy_net.cpu().state_dict(), 'save_models/CostTraining.pth')
     # policy_net = policy_net.cuda()
 
 if __name__=='__main__':
-    sytheticQueries = QueryLoader(QueryDir=config.sytheticDir)
+    sytheticQueries = myQueryLoader(QueryPath=config.trainSqlPath)
     print(len(sytheticQueries))
-    JOBQueries = QueryLoader(QueryDir=config.JOBDir)
-    print(len(JOBQueries))
-    Q4,Q1 = k_fold(JOBQueries,10,1)
-    print(len(Q4),len(Q1))
-    # print(Q4,Q1)
-    train(Q4+sytheticQueries,Q1)
+    
+    train(sytheticQueries, None)

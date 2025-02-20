@@ -113,7 +113,8 @@ class ENV(object):
             if self.run_mode == False:
                 return self.sel.plan2Cost()/self.sel.sqlt.getDPlantecy(), True
             else:
-                return self.sel.getResult(),True
+                return self.sel.hint(self.sel.total - 1), True
+                # return self.sel.getResult(),True
         else:
             return 0,False
 

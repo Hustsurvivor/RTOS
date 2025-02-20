@@ -1,2 +1,7 @@
 .vscode
 __pycache__
+data/
+result/
+save_models/
+
+!data/imdb-test/sql.txt

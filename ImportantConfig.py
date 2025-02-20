@@ -15,13 +15,18 @@ class Config:
     def __init__(self,):
         self.sytheticDir = "join-order-benchmark/"
         self.JOBDir = "join-order-benchmark/"
+        
+        self.trainSqlPath = "data/imdb-test/sql.txt"
+        self.testSqlPath = "data/imdb-test/sql.txt"
+        self.resultPath ="result/result.txt"
+        
         self.rootPool = "meanPool"
         self.schemaFile = "schema.sql"
         self.dbName = "imdb"
-        self.userName = "zpf"
-        self.password = "wsnk59ej"
+        self.userName = "lgn"
+        self.password = "li6545991360"
         self.usegpu = True
-        self.ip = "127.0.0.1"
+        self.ip = "localhost"
         self.port = 5432
         self.use_hint = True
         self.maxTimeOut = 10*1000
