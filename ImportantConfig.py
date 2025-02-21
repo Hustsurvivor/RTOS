@@ -40,12 +40,12 @@ class Config:
         self.learning_rate = 10e-3
         self.maxR = 4
         self.baselineValue = 1.4
-        self.isCostTraining = True
+        self.isCostTraining = False
         self.latencyRecord = True
         self.leafalias  = True
         self.latencyRecordFile = 'l_t.json'
-        self.max_parallel_workers_per_gather = 1
-        self.max_parallel_workers = 1
+        self.max_parallel_workers_per_gather = 0
+        self.max_parallel_workers = 0
         self.enable_mergejoin = True
         self.enable_hashjoin = True
         

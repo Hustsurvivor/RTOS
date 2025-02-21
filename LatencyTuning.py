@@ -42,7 +42,7 @@ featureSize = 128
 policy_net = SPINN(n_classes = 1, size = featureSize, n_words = 100,mask_size= 40*41,device=device).to(device)
 target_net = SPINN(n_classes = 1, size = featureSize, n_words = 100,mask_size= 40*41,device=device).to(device)
 
-policy_net.load_state_dict(torch.load("CostTraining.pth"))
+policy_net.load_state_dict(torch.load("save_models/CostTraining.pth"))
 target_net.load_state_dict(policy_net.state_dict())
 target_net.eval()
 
@@ -61,6 +61,17 @@ def k_fold(input_list,k,ix = 0):
             train.append(input_list[idx])
     return train,validate
 
+def myQueryLoader(QueryPath):
+    with open(QueryPath)as f:
+        sql_lines = f.readlines()
+    
+    sql_list = []
+    for line in sql_lines:
+        filename = line.split('#####')[0]
+        one_sql = line.split('#####')[1]
+        sql_list.append(sqlInfo(pgrunner, one_sql, filename))
+        
+    return sql_list
 
 def QueryLoader(QueryDir):
     def file_name(file_dir):
@@ -118,7 +129,7 @@ def resample_sql(sql_list):
                 res_sql.append(rewards[ts][1])
                 break
     return res_sql+sql_list
-def train(trainSet,validateSet):
+def train(trainSet,validateSet=None):
 
     trainSet_temp = trainSet
     losses = []
@@ -190,18 +201,17 @@ def train(trainSet,validateSet):
                 if ((i_episode + 1)%print_every==0):
                     print(np.mean(losses))
                     print("######################Epoch",i_episode//print_every,pg_cost)
-                    val_value = DQN.validate(validateSet)
+                    if validateSet is not None:
+                        val_value = DQN.validate(validateSet)
                     print("time",time.time()-startTime)
                     print("~~~~~~~~~~~~~~")
                 break
         if i_episode % TARGET_UPDATE == 0:
             target_net.load_state_dict(policy_net.state_dict())
-    torch.save(policy_net.cpu().state_dict(), 'LatencyTuning.pth')
+            torch.save(policy_net.cpu().state_dict(), 'save_models/LatencyTuning.pth')
+            policy_net.to(device)
+            assert 1
 
 if __name__=='__main__':
-    sytheticQueries = QueryLoader(QueryDir=config.sytheticDir)
-    # print(sytheticQueries)
-    JOBQueries = QueryLoader(QueryDir=config.JOBDir)
-    Q4,Q1 = k_fold(JOBQueries,10,1)
-    # print(Q4,Q1)
-    train(Q4+sytheticQueries,Q1)
+    sytheticQueries = myQueryLoader(QueryPath=config.trainSqlPath)
+    train(sytheticQueries, None)

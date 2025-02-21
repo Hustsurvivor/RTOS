@@ -3,5 +3,5 @@ __pycache__
 data/
 result/
 save_models/
-
+error.log
 !data/imdb-test/sql.txt

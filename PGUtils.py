@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import datetime
 import psycopg2
 import json
 from math import log
@@ -25,6 +26,24 @@ LatencyDict = {}
 selectivityDict = {}
 LatencyRecordFileHandle = None
 config  = Config()
+
+def write_log(log_file, log_level, message):
+    """
+    将日志写入指定文件
+    :param log_file: 日志文件路径
+    :param log_level: 日志级别（如 INFO、ERROR）
+    :param message: 日志内容
+    """
+    try:
+        # 获取当前时间
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # 打开文件，以追加模式写入
+        with open(log_file, 'a') as f:
+            log_entry = f"[{current_time}] [{log_level}] {str(message).strip()} \n"
+            f.write(log_entry)
+    except IOError as e:
+        print(f"无法写入日志文件: {e}")
 
 class PGRunner:
     def __init__(self,dbname = '',user = '',password = '',host = '',port = '',isCostTraining = True,latencyRecord = True,latencyRecordFile = "RecordFile.json"):
@@ -114,7 +133,8 @@ class PGRunner:
                 # print(json.dumps(rows[0][0][0]['Plan']))
                 afterCost = rows[0][0][0]['Plan']['Actual Total Time']
                 # print(1)
-            except:
+            except Exception as e:
+                write_log('error.log', 'INFO', e)
                 self.con.commit()
                 afterCost = max(thisQueryCost / sql.getDPCost()*sql.getDPlantecy(),sql.timeout())
             # print("PGUtils.py excited!!!",afterCost)

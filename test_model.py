@@ -65,5 +65,5 @@ if __name__=='__main__':
             reward, done = env.reward_new()
             if done:
                 with open(config.resultPath, 'a')as f:
-                    f.write('#####'.join(qid, reward.strip()) + '\n')
+                    f.write('#####'.join([qid, reward.strip()]) + '\n')
                 break
