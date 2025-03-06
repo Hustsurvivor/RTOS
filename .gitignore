@@ -4,4 +4,5 @@ data/
 result/
 save_models/
 error.log
+l_t.json
 !data/imdb-test/sql.txt

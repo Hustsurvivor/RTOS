@@ -262,7 +262,10 @@ def train(trainSet,validateSet=None):
                 break
         if i_episode % TARGET_UPDATE == 0:
             target_net.load_state_dict(policy_net.state_dict())
-    torch.save(policy_net.cpu().state_dict(), 'save_models/CostTraining.pth')
+        
+        if i_episode % 100 == 0:
+            torch.save(policy_net.cpu().state_dict(), 'save_models/CostTraining.pth')
+            policy_net.to(device)
     # policy_net = policy_net.cuda()
 
 if __name__=='__main__':
